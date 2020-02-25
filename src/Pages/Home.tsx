@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import logo from '../logo.svg';
 import '../App.css';
+import {Link} from "react-router-dom";
 
 const Home = () => {
   const [ apiResponse, setApiResponse ] = useState('');
@@ -13,12 +13,17 @@ const Home = () => {
   });
 
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p className="App-intro">{apiResponse}</p>
-      </header>
-    </div>
+    <>
+      <div>
+        <div>Welcome to Aerarium</div>
+        <p>{apiResponse}</p>
+      </div>
+      <div>
+        <Link to={"/merchant-dashboard"}>
+          <button>Merchant Dashboard</button>
+        </Link>
+      </div>
+    </>
   );
 };
 
