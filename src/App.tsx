@@ -2,6 +2,7 @@ import React from 'react';
 import {Link, Route, Switch} from 'react-router-dom';
 import Home from './Pages/Home';
 import MerchantDashboard from './Pages/MerchantDashboard';
+import CreateInvoice from './Pages/CreateInvoice';
 
 const App = () => {
   return (
@@ -13,12 +14,13 @@ const App = () => {
           </Link>
         </div>
       </header>
-      <body className="pageContent">
+      <main className="pageContent">
         <Switch>
           <Route exact path='/' component={Home}/>
           <Route exact path='/merchant-dashboard' component={MerchantDashboard}/>
+          <Route exact path='/create-invoice' component={CreateInvoice}/>
         </Switch>
-      </body>
+      </main>
     </div>
   )
 };

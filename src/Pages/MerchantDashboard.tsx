@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import styles from '../styles/MerchantDashboard.module.scss';
+import { Link } from 'react-router-dom';
 
 const MerchantDashboard = () => {
   const [ apiResponse, setApiResponse ] = useState('');
@@ -16,7 +17,9 @@ const MerchantDashboard = () => {
       <div>Merchant Dashboard</div>
       <p>{apiResponse}</p>
       <div className={styles.dashboardToolbar}>
-        <button>Create New Invoice</button>
+        <Link to="/create-invoice">
+          <button>Create New Invoice</button>
+        </Link>
         <div>Current Balance: £100.00</div>
         <div>
           <label>Top Up Balance</label>
