@@ -1,15 +1,29 @@
 import React, { useState } from 'react';
+import styles from '../styles/CreateInvoice.module.scss';
 
 const CreateInvoice = () => {
   const [customer, setCustomer] = useState('');
   const [item, setItem] = useState('');
   const [quantity, setQuantity] = useState(0);
   const [price, setPrice] = useState(0);
+  const [subTotal, setSubTotal] = useState(0);
+
+  const handleItemPriceChange = (e: any) => {
+    const input = Number(e.target.value);
+    const newPrice = Number(input.toFixed(2));
+    setPrice(newPrice);
+    setSubTotal(newPrice * quantity);
+  };
+
+  const handleItemQuantityChange = (e: any) => {
+    const newQuantity = Number(e.target.value);
+    setQuantity(newQuantity);
+    setSubTotal(price * newQuantity);
+  };
 
   const handleSubmit = () => {
-    const data = {customer, item, quantity, price};
-    console.log(data);
-    console.log(JSON.stringify(data));
+    const data = {customer, item, quantity, price, subTotal};
+
     fetch('http://localhost:9000/invoice', {
       method: 'POST',
       mode: 'cors',
@@ -29,25 +43,33 @@ const CreateInvoice = () => {
   };
 
   return <>
-    <form onSubmit={handleSubmit}>
-      <label>Merchant</label>
-      <div>Merchant Name</div>
-
-      <label>Customer</label>
-      <input onChange={e => setCustomer(e.target.value)} />
-
-      <label>Item</label>
-      <input onChange={e => setItem(e.target.value)} />
-
-      <label>Price</label>
-      <input onChange={e => setPrice(Number(e.target.value))} />
-
-      <label>Quantity</label>
-      <input onChange={e => setQuantity(Number(e.target.value))} />
-
-      <label>Sub-total</label>
-      <div>Calculate Sub-Total</div>
-
+    <form onSubmit={handleSubmit} className={styles.createInvoiceForm}>
+      <div className={styles.invoiceLineItem}>
+        <div className={styles.invoiceLineItemDetail}>
+          <label>Merchant</label>
+          <div>Merchant Name</div>
+        </div>
+        <div className={styles.invoiceLineItemDetail}>
+          <label>Customer</label>
+          <input onChange={e => setCustomer(e.target.value)} />
+        </div>
+        <div className={styles.invoiceLineItemDetail}>
+          <label>Item</label>
+          <input onChange={e => setItem(e.target.value)} />
+        </div>
+        <div className={styles.invoiceLineItemDetail}>
+          <label>Price</label>
+          <span>$<input onChange={handleItemPriceChange} /></span>
+        </div>
+        <div className={styles.invoiceLineItemDetail}>
+          <label>Quantity</label>
+          <input onChange={handleItemQuantityChange} />
+        </div>
+        <div className={styles.invoiceLineItemDetail}>
+          <label>Sub-total</label>
+          <div className={styles.subTotal}>${subTotal.toFixed(2)}</div>
+        </div>
+      </div>
       <button>Submit</button>
     </form>
   </>
