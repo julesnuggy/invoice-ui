@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
 
-  & > .invoiceLineItem {
+  & > .invoiceLineItem, .invoiceDetails  {
     display: flex;
     flex-direction: row;
 
@@ -27,8 +27,22 @@
     }
   }
 
+  & .addLineButton {
+    padding: 3px;
+    margin: 5px;
+    font-weight: bold;
+    text-align: center;
+    border: solid 1px dodgerblue;
+
+    &:hover {
+      cursor: pointer;
+      background-color: lightskyblue;
+    }
+  }
+
   & > button {
     width: 80px;
+    margin: 5px;
     align-self: flex-end;
   }
 }

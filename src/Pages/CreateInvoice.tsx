@@ -1,28 +1,41 @@
 import React, { useState } from 'react';
+import { Form } from 'react-final-form';
+import arrayMutators from 'final-form-arrays';
+import { FieldArray } from 'react-final-form-arrays'
+
 import styles from '../styles/CreateInvoice.module.scss';
+import InvoiceLineItem from '../components/InvoiceLineItem';
+
+export type InvoiceLineItemType = {
+  item: string,
+  quantity: number,
+  price: number,
+  subTotal: number
+}
+
+const defaultLineItem = {
+  item: '',
+  quantity: 0,
+  price: 0,
+  subTotal: 0
+};
 
 const CreateInvoice = () => {
   const [customer, setCustomer] = useState('');
-  const [item, setItem] = useState('');
-  const [quantity, setQuantity] = useState(0);
-  const [price, setPrice] = useState(0);
-  const [subTotal, setSubTotal] = useState(0);
+  const [invoiceLineItems, setInvoiceLineItems] = useState<InvoiceLineItemType[]>([]);
 
-  const handleItemPriceChange = (e: any) => {
-    const input = Number(e.target.value);
-    const newPrice = Number(input.toFixed(2));
-    setPrice(newPrice);
-    setSubTotal(newPrice * quantity);
-  };
-
-  const handleItemQuantityChange = (e: any) => {
-    const newQuantity = Number(e.target.value);
-    setQuantity(newQuantity);
-    setSubTotal(price * newQuantity);
+  const handleAddLineItem = (index: number, invoiceLineItem: InvoiceLineItemType) => {
+    const temp = invoiceLineItems;
+    temp[index] = invoiceLineItem;
+    setInvoiceLineItems(temp);
   };
 
   const handleSubmit = () => {
-    const data = {customer, item, quantity, price, subTotal};
+    const invoice = {
+      merchant: 'Merchant',
+      customer: customer,
+      invoiceLineItems
+    };
 
     fetch('http://localhost:9000/invoice', {
       method: 'POST',
@@ -34,7 +47,7 @@ const CreateInvoice = () => {
       },
       redirect: 'follow',
       referrer: 'no-referrer',
-      body: JSON.stringify(data)
+      body: JSON.stringify(invoice)
     })
       .then(res => {
         return new Promise<string>((resolve) => resolve(res.text()));
@@ -43,35 +56,35 @@ const CreateInvoice = () => {
   };
 
   return <>
-    <form onSubmit={handleSubmit} className={styles.createInvoiceForm}>
-      <div className={styles.invoiceLineItem}>
-        <div className={styles.invoiceLineItemDetail}>
-          <label>Merchant</label>
-          <div>Merchant Name</div>
-        </div>
-        <div className={styles.invoiceLineItemDetail}>
-          <label>Customer</label>
-          <input onChange={e => setCustomer(e.target.value)} />
-        </div>
-        <div className={styles.invoiceLineItemDetail}>
-          <label>Item</label>
-          <input onChange={e => setItem(e.target.value)} />
-        </div>
-        <div className={styles.invoiceLineItemDetail}>
-          <label>Price</label>
-          <span>$<input onChange={handleItemPriceChange} /></span>
-        </div>
-        <div className={styles.invoiceLineItemDetail}>
-          <label>Quantity</label>
-          <input onChange={handleItemQuantityChange} />
-        </div>
-        <div className={styles.invoiceLineItemDetail}>
-          <label>Sub-total</label>
-          <div className={styles.subTotal}>${subTotal.toFixed(2)}</div>
-        </div>
-      </div>
-      <button>Submit</button>
-    </form>
+    <Form
+      onSubmit={handleSubmit}
+      mutators={{...arrayMutators}}
+      render={({handleSubmit, form}) => {
+        return (
+          <form onSubmit={handleSubmit} className={styles.createInvoiceForm}>
+            <div className={styles.invoiceDetails}>
+              <div className={styles.invoiceLineItemDetail}>
+                <label>Merchant</label>
+                <div>Merchant Name</div>
+              </div>
+              <div className={styles.invoiceLineItemDetail}>
+                <label>Customer</label>
+                <input onChange={e => setCustomer(e.target.value)} />
+              </div>
+            </div>
+            <FieldArray name="InvoiceLineItems">
+              {({ fields }) => fields.map((field, index) => <InvoiceLineItem key={index} onChange={handleAddLineItem} invoiceNumber={index} />)}
+            </FieldArray>
+            <div
+              className={styles.addLineButton}
+              onClick={() => form.mutators.push('InvoiceLineItems', defaultLineItem)}>
+              Add Line Item
+            </div>
+            <button>Submit</button>
+          </form>
+        )
+      }}
+    />
   </>
 };
 
