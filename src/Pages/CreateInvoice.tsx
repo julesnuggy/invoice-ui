@@ -6,6 +6,13 @@ import { FieldArray } from 'react-final-form-arrays'
 import styles from '../styles/CreateInvoice.module.scss';
 import InvoiceLineItem from '../components/InvoiceLineItem';
 
+enum InvoiceLineItemEnum {
+  ITEM = 'item',
+  QUANTITY = 'quantity',
+  PRICE = 'price',
+  SUBTOTAL = 'subTotal'
+}
+
 export type InvoiceLineItemType = {
   item: string,
   quantity: number,
@@ -13,7 +20,7 @@ export type InvoiceLineItemType = {
   subTotal: number
 }
 
-const defaultLineItem = {
+const DEFAULT_LINE_ITEM = {
   item: '',
   quantity: 0,
   price: 0,
@@ -24,10 +31,34 @@ const CreateInvoice = () => {
   const [customer, setCustomer] = useState('');
   const [invoiceLineItems, setInvoiceLineItems] = useState<InvoiceLineItemType[]>([]);
 
-  const handleAddLineItem = (index: number, invoiceLineItem: InvoiceLineItemType) => {
-    const temp = invoiceLineItems;
-    temp[index] = invoiceLineItem;
+  const handleAmendLineItem = (index: number, key: InvoiceLineItemEnum, value: string | number) => {
+    const temp: InvoiceLineItemType[] = invoiceLineItems;
+    (temp[index][key] as any) = value;
     setInvoiceLineItems(temp);
+  };
+
+  const calculateSubTotal = (price: number, quantity: number) => Number((price * quantity).toFixed(2));
+
+  const getSubTotal = (index: number) => invoiceLineItems[index][InvoiceLineItemEnum.SUBTOTAL];
+
+  const handleItemChange = (e: any, index: number) => {
+    handleAmendLineItem(index, InvoiceLineItemEnum.ITEM, e.target.value);
+  };
+
+  const handlePriceChange = (e: any, index: number) => {
+    const input = Number(e.target.value);
+    const newPrice = Number(input.toFixed(2));
+    const quantity = invoiceLineItems[index][InvoiceLineItemEnum.QUANTITY];
+    handleAmendLineItem(index, InvoiceLineItemEnum.PRICE, newPrice);
+    handleAmendLineItem(index, InvoiceLineItemEnum.SUBTOTAL, calculateSubTotal(newPrice, quantity));
+  };
+
+  const handleQuantityChange = (e: any, index: number) => {
+    const input = Number(e.target.value);
+    const newQuantity = Number(input.toFixed());
+    const price = invoiceLineItems[index][InvoiceLineItemEnum.PRICE];
+    handleAmendLineItem(index, InvoiceLineItemEnum.QUANTITY, newQuantity);
+    handleAmendLineItem(index, InvoiceLineItemEnum.SUBTOTAL, calculateSubTotal(price, newQuantity));
   };
 
   const handleSubmit = () => {
@@ -73,11 +104,22 @@ const CreateInvoice = () => {
               </div>
             </div>
             <FieldArray name="InvoiceLineItems">
-              {({ fields }) => fields.map((field, index) => <InvoiceLineItem key={index} onChange={handleAddLineItem} invoiceNumber={index} />)}
+              {({ fields }) => fields.map((field, index) =>
+                <InvoiceLineItem
+                  key={index}
+                  invoiceNumber={index}
+                  onItemChange={handleItemChange}
+                  onPriceChange={handlePriceChange}
+                  onQuantityChange={handleQuantityChange}
+                  getSubTotal={getSubTotal}
+                />)}
             </FieldArray>
             <div
               className={styles.addLineButton}
-              onClick={() => form.mutators.push('InvoiceLineItems', defaultLineItem)}>
+              onClick={() => {
+                setInvoiceLineItems(currentState => currentState.concat({...DEFAULT_LINE_ITEM}));
+                form.mutators.push('InvoiceLineItems', DEFAULT_LINE_ITEM);
+              }}>
               Add Line Item
             </div>
             <button>Submit</button>
