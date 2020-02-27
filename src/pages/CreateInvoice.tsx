@@ -1,4 +1,5 @@
 import React, {useState} from 'react';
+import {Redirect} from 'react-router';
 import {Form} from 'react-final-form';
 import arrayMutators from 'final-form-arrays';
 import {FieldArray} from 'react-final-form-arrays';
@@ -15,6 +16,7 @@ const CreateInvoice = () => {
   const [invoiceLineItems, setInvoiceLineItems] = useState<InvoiceLineItemType[]>([]);
   const [invoiceSubtotal, setInvoiceSubtotal] = useState(0);
   const [invoiceDiscount, setInvoiceDiscount] = useState(0);
+  const [isFormSent, setIsFormSent] = useState(false);
 
   const invoiceUuid = invoiceLineItems[0]?.invoiceUuid || uuidv4();
 
@@ -81,10 +83,11 @@ const CreateInvoice = () => {
       .then(res => {
         return new Promise<string>((resolve) => resolve(res.text()));
       })
-      .then(res => console.log(res))
+      .then(() => setIsFormSent(true))
   };
 
   return <>
+    {isFormSent ? <Redirect to="/merchant-dashboard" /> : null}
     <Form
       onSubmit={handleSubmit}
       mutators={{...arrayMutators}}
