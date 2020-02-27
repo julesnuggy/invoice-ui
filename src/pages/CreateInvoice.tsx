@@ -8,11 +8,14 @@ import InvoiceLineItem from '../components/InvoiceLineItem';
 import {createDefaultLineItem, InvoiceLineItemEnum, InvoiceLineItemType, InvoiceRequest} from '../models/Invoice';
 
 import styles from '../styles/CreateInvoice.module.scss';
+import {calculateInvoiceTotal, calculateItemTotal} from '../utils/calculators';
 
 const CreateInvoice = () => {
   const [customer, setCustomer] = useState('');
   const [invoiceLineItems, setInvoiceLineItems] = useState<InvoiceLineItemType[]>([]);
   const [invoiceSubtotal, setInvoiceSubtotal] = useState(0);
+  const [invoiceDiscount, setInvoiceDiscount] = useState(0);
+
   const invoiceUuid = invoiceLineItems[0]?.invoiceUuid || uuidv4();
 
   const handleAmendLineItem = (index: number, key: InvoiceLineItemEnum, value: string | number) => {
@@ -20,10 +23,6 @@ const CreateInvoice = () => {
     (temp[index][key] as any) = value;
     setInvoiceLineItems(temp);
   };
-
-  const calculateInvoiceTotal = () => invoiceLineItems.reduce((a,b) => ({...a, total: a.total + b.total})).total;
-  const calculateItemTotal = (price: number, quantity: number) => Number((price * quantity).toFixed(2));
-  const getItemTotal = (index: number) => invoiceLineItems[index][InvoiceLineItemEnum.TOTAL];
 
   const handleItemChange = (e: any, index: number) => {
     handleAmendLineItem(index, InvoiceLineItemEnum.ITEM, e.target.value);
@@ -35,7 +34,7 @@ const CreateInvoice = () => {
     const quantity = invoiceLineItems[index][InvoiceLineItemEnum.QUANTITY];
     handleAmendLineItem(index, InvoiceLineItemEnum.PRICE, newPrice);
     handleAmendLineItem(index, InvoiceLineItemEnum.TOTAL, calculateItemTotal(newPrice, quantity));
-    setInvoiceSubtotal(calculateInvoiceTotal());
+    setInvoiceSubtotal(calculateInvoiceTotal(invoiceLineItems));
   };
 
   const handleQuantityChange = (e: any, index: number) => {
@@ -44,8 +43,16 @@ const CreateInvoice = () => {
     const price = invoiceLineItems[index][InvoiceLineItemEnum.PRICE];
     handleAmendLineItem(index, InvoiceLineItemEnum.QUANTITY, newQuantity);
     handleAmendLineItem(index, InvoiceLineItemEnum.TOTAL, calculateItemTotal(price, newQuantity));
-    setInvoiceSubtotal(calculateInvoiceTotal());
+    setInvoiceSubtotal(calculateInvoiceTotal(invoiceLineItems));
   };
+
+  const handleDiscountChange = (e: any) => {
+    const input = Number(e.target.value);
+    const newDiscount = Number(input.toFixed(2));
+    setInvoiceDiscount(newDiscount);
+  };
+
+  const getItemTotal = (index: number) => invoiceLineItems[index][InvoiceLineItemEnum.TOTAL];
 
   const handleSubmit = () => {
     const invoice: InvoiceRequest = {
@@ -53,8 +60,8 @@ const CreateInvoice = () => {
       merchant: 'M',
       customer: customer,
       subtotal: invoiceSubtotal,
-      discount: 34,
-      grandTotal: 1200,
+      discount: invoiceDiscount,
+      grandTotal: invoiceSubtotal - invoiceDiscount,
       status: 'PENDING',
       invoiceLineItems
     };
@@ -118,15 +125,15 @@ const CreateInvoice = () => {
               <div className={styles.invoicePriceSummary}>
                 <div className={styles.summarySection}>
                   <label>Subtotal:</label>
-                  <div>{invoiceLineItems.length > 0 ? `$${invoiceSubtotal}` : null}</div>
+                  <div>${invoiceSubtotal}</div>
                 </div>
                 <div className={styles.summarySection}>
                   <label>Discount:</label>
-                  <input></input>
+                  <span>$<input onChange={handleDiscountChange} placeholder="0" /></span>
                 </div>
                 <div className={styles.summarySection}>
                   <label>Grand Total:</label>
-                  <div></div>
+                  <div>${invoiceSubtotal - invoiceDiscount}</div>
                 </div>
               </div>
             )}
