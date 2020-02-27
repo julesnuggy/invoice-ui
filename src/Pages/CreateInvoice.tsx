@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Form } from 'react-final-form';
 import arrayMutators from 'final-form-arrays';
 import { FieldArray } from 'react-final-form-arrays'
+import { v4 as uuidv4 } from 'uuid';
 
 import styles from '../styles/CreateInvoice.module.scss';
 import InvoiceLineItem from '../components/InvoiceLineItem';
@@ -10,26 +11,29 @@ enum InvoiceLineItemEnum {
   ITEM = 'item',
   QUANTITY = 'quantity',
   PRICE = 'price',
-  SUBTOTAL = 'subTotal'
+  TOTAL = 'total'
 }
 
 export type InvoiceLineItemType = {
+  invoiceUuid: string,
   item: string,
   quantity: number,
   price: number,
-  subTotal: number
+  total: number
 }
 
-const DEFAULT_LINE_ITEM = {
+const createDefaultLineItem = (invoiceUuid: string) => ({
+  invoiceUuid,
   item: '',
   quantity: 0,
   price: 0,
-  subTotal: 0
-};
+  total: 0
+});
 
 const CreateInvoice = () => {
   const [customer, setCustomer] = useState('');
   const [invoiceLineItems, setInvoiceLineItems] = useState<InvoiceLineItemType[]>([]);
+  const invoiceUuid = invoiceLineItems[0]?.invoiceUuid || uuidv4();
 
   const handleAmendLineItem = (index: number, key: InvoiceLineItemEnum, value: string | number) => {
     const temp: InvoiceLineItemType[] = invoiceLineItems;
@@ -37,9 +41,9 @@ const CreateInvoice = () => {
     setInvoiceLineItems(temp);
   };
 
-  const calculateSubTotal = (price: number, quantity: number) => Number((price * quantity).toFixed(2));
+  const calculateItemTotal = (price: number, quantity: number) => Number((price * quantity).toFixed(2));
 
-  const getSubTotal = (index: number) => invoiceLineItems[index][InvoiceLineItemEnum.SUBTOTAL];
+  const getItemTotal = (index: number) => invoiceLineItems[index][InvoiceLineItemEnum.TOTAL];
 
   const handleItemChange = (e: any, index: number) => {
     handleAmendLineItem(index, InvoiceLineItemEnum.ITEM, e.target.value);
@@ -50,7 +54,7 @@ const CreateInvoice = () => {
     const newPrice = Number(input.toFixed(2));
     const quantity = invoiceLineItems[index][InvoiceLineItemEnum.QUANTITY];
     handleAmendLineItem(index, InvoiceLineItemEnum.PRICE, newPrice);
-    handleAmendLineItem(index, InvoiceLineItemEnum.SUBTOTAL, calculateSubTotal(newPrice, quantity));
+    handleAmendLineItem(index, InvoiceLineItemEnum.TOTAL, calculateItemTotal(newPrice, quantity));
   };
 
   const handleQuantityChange = (e: any, index: number) => {
@@ -58,13 +62,18 @@ const CreateInvoice = () => {
     const newQuantity = Number(input.toFixed());
     const price = invoiceLineItems[index][InvoiceLineItemEnum.PRICE];
     handleAmendLineItem(index, InvoiceLineItemEnum.QUANTITY, newQuantity);
-    handleAmendLineItem(index, InvoiceLineItemEnum.SUBTOTAL, calculateSubTotal(price, newQuantity));
+    handleAmendLineItem(index, InvoiceLineItemEnum.TOTAL, calculateItemTotal(price, newQuantity));
   };
 
   const handleSubmit = () => {
     const invoice = {
-      merchant: 'Merchant',
+      invoiceUuid,
+      merchant: 'Merchant-san',
       customer: customer,
+      total: 1234,
+      discount: 34,
+      grandTotal: 1200,
+      status: 'PENDING',
       invoiceLineItems
     };
 
@@ -108,17 +117,18 @@ const CreateInvoice = () => {
                 <InvoiceLineItem
                   key={index}
                   invoiceNumber={index}
+                  invoiceUuid={invoiceUuid}
                   onItemChange={handleItemChange}
                   onPriceChange={handlePriceChange}
                   onQuantityChange={handleQuantityChange}
-                  getSubTotal={getSubTotal}
+                  getItemTotal={getItemTotal}
                 />)}
             </FieldArray>
             <div
               className={styles.addLineButton}
               onClick={() => {
-                setInvoiceLineItems(currentState => currentState.concat({...DEFAULT_LINE_ITEM}));
-                form.mutators.push('InvoiceLineItems', DEFAULT_LINE_ITEM);
+                setInvoiceLineItems(currentState => currentState.concat({...createDefaultLineItem(invoiceUuid)}));
+                form.mutators.push('InvoiceLineItems', createDefaultLineItem(invoiceUuid));
               }}>
               Add Line Item
             </div>
