@@ -8,6 +8,17 @@ export type InvoiceType = {
   status: string
 }
 
+export type InvoiceRequest = {
+  invoiceUuid: string,
+  merchant: string,
+  customer: string,
+  subtotal: number,
+  discount: number,
+  grandTotal: number,
+  status: string,
+  invoiceLineItems: InvoiceLineItemType[]
+}
+
 export type InvoiceLineItemType = {
   invoiceUuid: string,
   item: string,
