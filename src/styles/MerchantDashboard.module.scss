@@ -9,3 +9,21 @@
 .topUpInput {
   margin: 0 1rem;
 }
+
+.tableContainer {
+  margin: 16px 0;
+}
+
+table, tbody, thead, td, tr {
+  border: solid 1px black;
+  border-collapse: collapse;
+}
+
+thead {
+  font-weight: bold;
+  background-color: goldenrod;
+}
+
+tr, td {
+  padding: 6px;
+}

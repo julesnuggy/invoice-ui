@@ -1,8 +1,8 @@
 import React from 'react';
 import {Link, Route, Switch} from 'react-router-dom';
-import Home from './Pages/Home';
-import MerchantDashboard from './Pages/MerchantDashboard';
-import CreateInvoice from './Pages/CreateInvoice';
+import Home from './pages/Home';
+import MerchantDashboard from './pages/MerchantDashboard';
+import CreateInvoice from './pages/CreateInvoice';
 
 const App = () => {
   return (

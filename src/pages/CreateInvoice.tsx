@@ -4,31 +4,10 @@ import arrayMutators from 'final-form-arrays';
 import { FieldArray } from 'react-final-form-arrays'
 import { v4 as uuidv4 } from 'uuid';
 
-import styles from '../styles/CreateInvoice.module.scss';
 import InvoiceLineItem from '../components/InvoiceLineItem';
+import {createDefaultLineItem, InvoiceLineItemEnum, InvoiceLineItemType} from '../models/Invoice';
 
-enum InvoiceLineItemEnum {
-  ITEM = 'item',
-  QUANTITY = 'quantity',
-  PRICE = 'price',
-  TOTAL = 'total'
-}
-
-export type InvoiceLineItemType = {
-  invoiceUuid: string,
-  item: string,
-  quantity: number,
-  price: number,
-  total: number
-}
-
-const createDefaultLineItem = (invoiceUuid: string) => ({
-  invoiceUuid,
-  item: '',
-  quantity: 0,
-  price: 0,
-  total: 0
-});
+import styles from '../styles/CreateInvoice.module.scss';
 
 const CreateInvoice = () => {
   const [customer, setCustomer] = useState('');
