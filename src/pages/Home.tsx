@@ -1,22 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import {Link} from "react-router-dom";
+import {Link, Redirect} from 'react-router-dom';
 
 import '../App.css';
 
 const Home = () => {
-  const [ apiResponse, setApiResponse ] = useState('');
+  const [ logIn, setLogIn ] = useState(false);
   const [ name, setName] = useState('');
   const [ type, setType] = useState('');
 
-  useEffect(() => {
-    fetch('http://localhost:9000/')
-      .then(res => res.text())
-      .then(res => setApiResponse(res))
-      .catch(err => console.log(err));
-  });
-
   const onGetAllClick = () => {
-    fetch('http://localhost:9000/user')
+    fetch('http://localhost:9000/users')
       .then(res => res.text())
       .then(res => console.log(res))
   };
@@ -47,9 +40,11 @@ const Home = () => {
 
   return (
     <>
+      {logIn ? <Redirect to="/users/login"/> : null}
       <div>
         <div>Welcome to Aerarium</div>
-        <p>{apiResponse}</p>
+        <button onClick={() => setLogIn(true)}>Log In</button>
+        <a href="/users/login">LOGIN????</a>
       </div>
       <div>
         <Link to={"/merchant-dashboard"}>

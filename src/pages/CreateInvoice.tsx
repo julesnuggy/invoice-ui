@@ -12,6 +12,7 @@ import styles from '../styles/CreateInvoice.module.scss';
 import {calculateInvoiceTotal, calculateItemTotal} from '../utils/calculators';
 
 const CreateInvoice = () => {
+  const [merchant, setMerchant] = useState('');
   const [customer, setCustomer] = useState('');
   const [invoiceLineItems, setInvoiceLineItems] = useState<InvoiceLineItemType[]>([]);
   const [invoiceSubtotal, setInvoiceSubtotal] = useState(0);
@@ -59,8 +60,8 @@ const CreateInvoice = () => {
   const handleSubmit = () => {
     const invoice: InvoiceRequest = {
       invoiceUuid,
-      merchant: 'M',
-      customer: customer,
+      merchant,
+      customer,
       subtotal: invoiceSubtotal,
       discount: invoiceDiscount,
       grandTotal: invoiceSubtotal - invoiceDiscount,
@@ -97,7 +98,7 @@ const CreateInvoice = () => {
             <div className={styles.invoiceDetails}>
               <div className={styles.invoiceLineItemDetail}>
                 <label>Merchant</label>
-                <div>Merchant Name</div>
+                <input onChange={e => setMerchant(e.target.value)} />
               </div>
               <div className={styles.invoiceLineItemDetail}>
                 <label>Customer</label>
